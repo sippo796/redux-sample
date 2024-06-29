@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import TodoItem from './todo-item';
-import { Todo } from '../../types';
+import { useDispatch, useSelector } from 'react-redux';
+import { Dispatch } from 'redux'
+import { TodoAction, Todo } from '../../types'
+import { RootStore } from '../../store';
 
-type Props = {
-  todos: { id: number; text: string }[];
-  addTodo: (todo: Todo) => void;
-  removeTodo: (id: number) => void;
-};
-
-const TodoList: React.FC<Props> = ({ todos, addTodo, removeTodo }: Props) => {
+const TodoList: React.FC = () => {
   const [text, setText] = useState('');
+  const dispatch = useDispatch<Dispatch<TodoAction>>();
+  const todos = useSelector<RootStore, Todo[]>((state: RootStore) => state.todo.todos);
 
-  const handleAdd = () => {
-    addTodo({
-      id: Date.now(),
-      text,
-    });
+  const handleAdd = useCallback(() => {
+    dispatch({
+      type: 'ADD_TODO',
+      payload:{
+        id: Date.now(),
+        text,
+    }});
     setText('');
-  };
+  }, [dispatch, text]);
 
   return (
     <div>
@@ -29,7 +30,7 @@ const TodoList: React.FC<Props> = ({ todos, addTodo, removeTodo }: Props) => {
       <button onClick={handleAdd}>Add</button>
       <div>
         {todos?.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} removeTodo={removeTodo} />
+          <TodoItem key={todo.id} todo={todo} />
         ))}
       </div>
     </div>
